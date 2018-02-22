@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="colorPrimary">#8AA29E</color>
+    <color name="colorPrimaryDark">#686963</color>
+    <color name="colorAccent">#ED6A5A</color>
+    <color name="graniteGray">#686963</color>
+    <color name="cadetGrey">#8AA29E</color>
+    <color name="silverChalice">#ACAD94</color>
+    <color name="dustStorm">#E5D4CE</color>
+    <color name="terraCotta">#ED6A5A</color>
+    <color name="cedarChest">#C2574A</color>
+    <color name="solidPink">#823A32</color>
+    <color name="chestnut">#823A32</color>
+    <color name="melon">#F5B1A9</color>
+    <color name="grullo">#9D9E87</color>
+    <color name="blackLeatherJacket">#2F3029</color>
+    <color name="silverPink">#C4AFA0</color>
+    <color name="romanSilver">#7E9490</color>
+    <color name="fhtw_blue">#1565C0</color>
+    <color name="fhtw_grey">#777A83</color>
+    <color name="fhtw_green">#7CB342</color>
+    <color name="white">#ffffff</color>
+</resources>
