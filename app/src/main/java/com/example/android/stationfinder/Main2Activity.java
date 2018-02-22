@@ -1,10 +1,10 @@
 package com.example.android.stationfinder;
 
 import android.app.Activity;
+import android.app.AlertDialog;
 import android.content.Intent;
 import android.database.sqlite.SQLiteDatabase;
 import android.os.AsyncTask;
-import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.widget.Button;
 import android.widget.EditText;
@@ -131,12 +131,43 @@ public class Main2Activity extends Activity {
 
         String userInput = et_rbl.getText().toString();
         String[] nums = userInput.split(",");
-        rbls = new ArrayList<>();
-        for(int i = 0; i< nums.length; i++){
+        String empty = "";
+        if(nums.length != 0){
+            rbls = new ArrayList<>();
+            for (String num : nums) {
+                if (num.trim().equals(empty)) {
 
-            rbls.add(Integer.parseInt(nums[i].trim()));
+                    AlertDialog.Builder builder = new AlertDialog.Builder(Main2Activity.this);
+                    builder.setMessage("Please enter a number!")
+                            .setNeutralButton("OK", null);
+                    AlertDialog dialog = builder.create();
+                    dialog.show();
+                    et_rbl.getText().clear();
+
+                }
+                else if(!wienerLinienDBHelper.rblExists(num)){
+                    AlertDialog.Builder builder = new AlertDialog.Builder(Main2Activity.this);
+                    builder.setMessage("No such RBL!")
+                            .setNeutralButton("OK", null);
+                    AlertDialog dialog = builder.create();
+                    dialog.show();
+                }
+
+                 else {
+
+                    rbls.add(Integer.parseInt(num.trim()));
+                    new GetRealtimeTask(Main2Activity.this).execute(WienerLinenApi.buildWienerLinienMonitorUrl(rbls));
+                }
+            }
+
+        }else {
+            AlertDialog.Builder builder = new AlertDialog.Builder(Main2Activity.this);
+            builder.setMessage("Please enter a number!")
+                    .setNeutralButton("OK", null);
+            AlertDialog dialog = builder.create();
+            dialog.show();
         }
-        new GetRealtimeTask(Main2Activity.this).execute(WienerLinenApi.buildWienerLinienMonitorUrl(rbls));
+
        // id = Integer.parseInt(userInput);
         //tv_test.setText(wienerLinienDBHelper.getStationName(id));
 

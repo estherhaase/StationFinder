@@ -1,13 +1,14 @@
 <resources>
     <string name="app_name">StationFinder</string>
-    <string name="editText_ToolsText">RBL Number goes here</string>
+    <string name="editText_ToolsText">RBL Number goes here...</string>
     <string name="button_text">GO</string>
     <string name="textView_input_format">RBL numbers must be entered in the following manner: 122, 555, 933,...</string>
     <string name="textView_input_station">Please enter name of the desired station!</string>
     <string name="textView_input_rbl">Please enter RBL Number!</string>
     <string name="btn_rbl">rbl</string>
     <string name="btn_station_name">name</string>
-    <string name="search_text">find stations by name or rbl number</string>
-    <string name="actv_hint">Enter name of station</string>
+    <string name="search_text">Find stations by name or rbl number</string>
+    <string name="actv_hint">Name goes here...</string>
     <string name="powered_by">powered by: </string>
+    <string name="refresh_description">refresh button</string>
 </resources>

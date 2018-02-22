@@ -1,29 +1,23 @@
 package com.example.android.stationfinder;
 
 import android.app.Activity;
+import android.app.AlertDialog;
 import android.content.Intent;
 import android.database.sqlite.SQLiteDatabase;
 import android.os.AsyncTask;
-import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.widget.ArrayAdapter;
 import android.widget.AutoCompleteTextView;
 import android.widget.Button;
-import android.widget.EditText;
 import android.widget.TextView;
-
 
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import java.io.BufferedReader;
 import java.io.IOException;
-import java.io.InputStreamReader;
 import java.lang.ref.WeakReference;
-import java.net.MalformedURLException;
 import java.net.URL;
-import java.net.URLConnection;
 import java.util.ArrayList;
 
 import butterknife.BindView;
@@ -55,15 +49,15 @@ public class MainActivity extends Activity {
     // EditText et_rbl;
     @BindView(R.id.btn_go)
     Button btn_go;
-    @BindView(R.id.tv_test)
-    TextView tv_test;
+    //@BindView(R.id.tv_test)
+   // TextView tv_test;
     @BindView(R.id.actv_search)
     AutoCompleteTextView actv_search;
     ArrayList<TransportUnit> transportUnits;
     ArrayList<String> stationNames;
     private WienerLinienDBHelper wienerLinienDBHelper;
     SQLiteDatabase db;
-    private int id;
+   // private int id;
     ArrayList<Integer> rbls;
 
     /*** In onCreate wird die Activity erstellt, das layout festgelegt, die diversen Eingabefelder und Buttons aktiviert und die benötigten Variablen instanziiert **/
@@ -190,7 +184,19 @@ public class MainActivity extends Activity {
 
         String userInput = actv_search.getText().toString();
         rbls = wienerLinienDBHelper.getRBLs(wienerLinienDBHelper.getStationId(userInput));
-        new GetRealtimeTask(MainActivity.this).execute(WienerLinenApi.buildWienerLinienMonitorUrl(rbls));
+        if(rbls != null){
+            new GetRealtimeTask(MainActivity.this).execute(WienerLinenApi.buildWienerLinienMonitorUrl(rbls));
+        }
+        else{
+            AlertDialog.Builder builder = new AlertDialog.Builder(MainActivity.this);
+            builder.setMessage("Data is incomplete for this Station!")
+                    .setNeutralButton("OK", null);
+
+
+            AlertDialog dialog = builder.create();
+            dialog.show();
+            actv_search.getText().clear();
+        }
 
     }
 

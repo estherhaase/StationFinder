@@ -4,7 +4,6 @@ package com.example.android.stationfinder;
 import android.os.Parcel;
 import android.os.Parcelable;
 
-import java.util.ArrayList;
 
 public class TransportUnit implements Parcelable {
 
@@ -15,7 +14,7 @@ public class TransportUnit implements Parcelable {
     private final double lon;
     private final boolean barrierFree;
 
-    public TransportUnit(String lineName, String lineDirection, String[] depTime1, double lat, double lon, boolean barrierFree) {
+    TransportUnit(String lineName, String lineDirection, String[] depTime1, double lat, double lon, boolean barrierFree) {
         this.lineName = lineName;
         this.lineDirection = lineDirection;
         this.depTime1 = depTime1;
@@ -49,7 +48,7 @@ public class TransportUnit implements Parcelable {
         return lat;
     }
 
-    public String[] getDepTime1() {
+    String[] getDepTime1() {
         return depTime1;
     }
 

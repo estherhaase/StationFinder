@@ -4,7 +4,6 @@ import android.net.Uri;
 
 import java.io.IOException;
 import java.io.InputStream;
-import java.lang.reflect.Array;
 import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URL;
@@ -13,7 +12,7 @@ import java.util.Scanner;
 
 import static com.example.android.stationfinder.BuildConfig.API_KEY;
 
-public class WienerLinenApi {
+class WienerLinenApi {
 
     private final static String WL_AUTHORITY = "www.wienerlinien.at";
     private final static String REALTIME_PATH = "ogd_realtime";
@@ -28,7 +27,7 @@ public class WienerLinenApi {
     private final static String FILE_PATH = "QueryData.php";
 
 
-    public static URL buildWienerLinienMonitorUrl(ArrayList<Integer> rblNum){
+    static URL buildWienerLinienMonitorUrl(ArrayList<Integer> rblNum){
 
         Uri monitorUri;
         Uri.Builder builder = new Uri.Builder();
@@ -57,7 +56,7 @@ public class WienerLinenApi {
         return url;
     }
 
-    public static URL buildDatabaseRequestUrl(){
+    static URL buildDatabaseRequestUrl(){
 
         Uri dbUri;
         Uri.Builder builder = new Uri.Builder();
@@ -79,7 +78,7 @@ public class WienerLinenApi {
 
     }
 
-    public static String getHttpResponse(URL url) throws IOException {
+    static String getHttpResponse(URL url) throws IOException {
 
         HttpURLConnection urlConnection = (HttpURLConnection) url.openConnection();
 

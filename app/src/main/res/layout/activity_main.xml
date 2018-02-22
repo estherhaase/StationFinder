@@ -4,11 +4,11 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@color/blackLeatherJacket"
+    android:background="@color/fhtw_blue"
 
     tools:context="com.example.android.stationfinder.MainActivity">
 
-    <TextView
+    <!--TextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="@string/textView_input_station"
@@ -17,20 +17,26 @@
         app:layout_constraintRight_toLeftOf="parent"
         app:layout_constraintTop_toTopOf="@id/btn_go"
         android:background="@drawable/rounded_border"
-        />
+        /-->
     <TextView
-        android:layout_width="wrap_content"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:id="@+id/tv_test"
+        android:background="@color/fhtw_grey"
+        android:text="@string/textView_input_station"
+        android:textAlignment="center"
+        android:padding="30dp"
+        android:textSize="20sp"
+        android:textStyle="bold"
+        android:id="@+id/tv_grey"
         />
 
-    <ImageView
+    <!--ImageView
         android:layout_width="50dp"
         android:layout_height="50dp"
 
         app:layout_constraintTop_toTopOf="parent"
         android:padding="10dp"
-        app:layout_constraintRight_toLeftOf="parent"/>
+        app:layout_constraintRight_toLeftOf="parent"/-->
     <!--EditText
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
@@ -46,23 +52,30 @@
         android:layout_height="wrap_content"
         android:dropDownWidth = "200dp"
         android:id="@+id/actv_search"
+        android:padding="25dp"
         app:layout_constraintLeft_toLeftOf="parent"
         app:layout_constraintRight_toRightOf="parent"
         app:layout_constraintBottom_toTopOf="@id/btn_go"
+        app:layout_constraintTop_toBottomOf="@+id/tv_grey"
         android:hint="@string/actv_hint"
         android:background="@drawable/more_rounded_corners"
         android:layout_marginBottom="20dp"
+        android:layout_marginTop="50dp"
+        android:inputType="textAutoComplete"
+        android:imeOptions="actionDone"
         />
 
     <Button
         android:id="@+id/btn_go"
-        android:layout_width="69dp"
-        android:layout_height="67dp"
+        android:layout_width="100dp"
+        android:layout_height="100dp"
         android:background="@drawable/more_rounded_corners"
         android:text="@string/button_text"
-        app:layout_constraintBottom_toTopOf="parent"
+        android:textStyle="bold"
+        android:textSize="20sp"
         app:layout_constraintLeft_toRightOf="parent"
         app:layout_constraintRight_toLeftOf="parent"
-        app:layout_constraintTop_toBottomOf="parent" />
+        app:layout_constraintTop_toBottomOf="@id/actv_search"
+        app:layout_constraintBottom_toBottomOf="parent"/>
 
 </android.support.constraint.ConstraintLayout>

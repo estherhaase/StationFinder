@@ -18,10 +18,11 @@
     <Button
         android:layout_width="50dp"
         android:layout_height="50dp"
-        android:background="@drawable/refreshsmall"
-        android:padding="10dp"
+        android:background="@drawable/refreshsmallgreen"
+        android:layout_margin="10dp"
         android:layout_alignParentRight="true"
         android:id="@+id/btn_refresh"
+        android:contentDescription="@string/refresh_description"
 
         />
 </RelativeLayout>

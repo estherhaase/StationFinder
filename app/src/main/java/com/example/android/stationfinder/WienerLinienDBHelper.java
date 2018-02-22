@@ -12,6 +12,7 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.io.IOException;
+import java.lang.ref.WeakReference;
 import java.net.URL;
 import java.util.ArrayList;
 
@@ -20,7 +21,7 @@ public class WienerLinienDBHelper extends SQLiteOpenHelper {
 
     private static WienerLinienDBHelper sInstance;
     private static final String DATABASE_NAME = "wienerlinien.db";
-    private static final int DATABASE_VERSION = 14;
+    private static final int DATABASE_VERSION = 15;
     private static final String TABLE_STEIGE = "Steige";
     private static final String COL_RBL = "RBL";
     private static final String COL_LAT = "Latitude";
@@ -37,7 +38,7 @@ public class WienerLinienDBHelper extends SQLiteOpenHelper {
             + " (" + COL_HALTESTELLEN_ID + " INTEGER PRIMARY KEY NOT NULL, "
             + COL_NAME + " TEXT)";
 
-    public static synchronized WienerLinienDBHelper getsInstance(Context context){
+    static synchronized WienerLinienDBHelper getsInstance(Context context){
         if(sInstance == null){
             sInstance = new WienerLinienDBHelper(context.getApplicationContext());
         }
@@ -54,11 +55,18 @@ public class WienerLinienDBHelper extends SQLiteOpenHelper {
         db.execSQL(CREATE_HALTESTELLEN_TABLE);
         db.execSQL(CREATE_STEIGE_TABLE);
 
-    new GetStationInformationTask().execute(WienerLinenApi.buildDatabaseRequestUrl());
+    new GetStationInformationTask(WienerLinienDBHelper.this).execute(WienerLinenApi.buildDatabaseRequestUrl());
 
     }
 
-    class GetStationInformationTask extends AsyncTask<URL, Void, String[]> {
+    static class GetStationInformationTask extends AsyncTask<URL, Void, String[]> {
+
+        WeakReference<WienerLinienDBHelper> wienerLinienDBHelperWeakReference;
+
+        GetStationInformationTask(WienerLinienDBHelper context){
+            wienerLinienDBHelperWeakReference = new WeakReference<>(context);
+        }
+
         @Override
         protected String[] doInBackground(URL... urls) {
 
@@ -81,7 +89,7 @@ public class WienerLinienDBHelper extends SQLiteOpenHelper {
                 for (int i = 0; i < stations.length(); i++) {
                     int tempId = Integer.parseInt(stations.getJSONObject(i).getString("HALTESTELLEN_ID"));
                     String tempName = stations.getJSONObject(i).getString("NAME");
-                    addStation(tempId, tempName);
+                   wienerLinienDBHelperWeakReference.get().addStation(tempId, tempName);
                 }
 
                 for (int j = 0; j < rbls.length(); j++) {
@@ -90,7 +98,7 @@ public class WienerLinienDBHelper extends SQLiteOpenHelper {
                     double lon = Double.parseDouble(rbls.getJSONObject(j).getString("STEIG_WGS84_LON"));
                     int tempId = Integer.parseInt(rbls.getJSONObject(j).getString("FK_HALTESTELLEN_ID"));
 
-                    addRbl(rbl, lat, lon, tempId);
+                   wienerLinienDBHelperWeakReference.get().addRbl(rbl, lat, lon, tempId);
                 }
 
 
@@ -141,7 +149,7 @@ public class WienerLinienDBHelper extends SQLiteOpenHelper {
 
         sqLiteDatabase.execSQL(CREATE_HALTESTELLEN_TABLE);
         sqLiteDatabase.execSQL(CREATE_STEIGE_TABLE);
-        new GetStationInformationTask().execute(WienerLinenApi.buildDatabaseRequestUrl());
+        new GetStationInformationTask(WienerLinienDBHelper.this).execute(WienerLinenApi.buildDatabaseRequestUrl());
 
 
     }
@@ -208,8 +216,8 @@ public class WienerLinienDBHelper extends SQLiteOpenHelper {
         SQLiteDatabase db = getReadableDatabase();
         String stringId = Integer.toString(id);
         ArrayList<Integer> rbls = new ArrayList<>();
-        String SQL = "SELECT " + COL_RBL + " FROM "  + TABLE_STEIGE + " WHERE " + COL_HALTESTELLEN_ID + "  = ?";
-        Cursor res = db.rawQuery(SQL, new String[]{stringId});
+        String sql = "SELECT " + COL_RBL + " FROM "  + TABLE_STEIGE + " WHERE " + COL_HALTESTELLEN_ID + "  = ?";
+        Cursor res = db.rawQuery(sql, new String[]{stringId});
 
        if(res.getCount() == 0){
            return null;
@@ -225,7 +233,7 @@ public class WienerLinienDBHelper extends SQLiteOpenHelper {
 
     }
 
-    public int getStationId(String name){
+    int getStationId(String name){
 
         SQLiteDatabase db = getReadableDatabase();
         String SQL = "SELECT " + COL_HALTESTELLEN_ID + " FROM " + TABLE_HALTESTELLEN + " WHERE " + COL_NAME + " = ?";
@@ -235,6 +243,18 @@ public class WienerLinienDBHelper extends SQLiteOpenHelper {
         else {
             res.moveToFirst();
         }return res.getInt(0);
+
+    }
+
+    boolean rblExists(String rbl){
+
+        SQLiteDatabase db = this.getReadableDatabase();
+
+        String sql = "SELECT " + COL_HALTESTELLEN_ID + " FROM " + TABLE_STEIGE + " WHERE " + COL_RBL + " = ?";
+        Cursor res = db.rawQuery(sql, new String[]{ rbl});
+
+        if(res.moveToFirst()) return true;
+        else return false;
 
     }
 }
