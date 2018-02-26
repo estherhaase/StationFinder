@@ -14,8 +14,15 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
-        <activity android:name=".MainActivity" />
-        <activity android:name=".StationActivity" />
+        <activity
+            android:name=".MainActivity"
+            android:parentActivityName=".MenuActivity" />
+        <activity
+            android:name=".StationActivity"
+            android:parentActivityName=".MenuActivity" />
+        <activity
+            android:name=".Main2Activity"
+            android:parentActivityName=".MenuActivity" />
         <activity android:name=".MenuActivity">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
@@ -30,8 +37,11 @@
         <meta-data
             android:name="com.google.android.gms.version"
             android:value="@integer/google_play_services_version" />
+        <meta-data
+            android:name="android.support.PARENT_ACTIVITY"
+            android:value=".MenuActivity" />
 
-        <activity android:name=".Main2Activity"></activity>
+
     </application>
 
 </manifest>

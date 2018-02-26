@@ -1,15 +1,15 @@
 package com.example.android.stationfinder;
 
 import android.app.Activity;
-import android.app.AlertDialog;
 import android.content.Intent;
+import android.content.res.Configuration;
 import android.database.sqlite.SQLiteDatabase;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.widget.ArrayAdapter;
 import android.widget.AutoCompleteTextView;
 import android.widget.Button;
-import android.widget.TextView;
+import android.widget.Toast;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -65,7 +65,16 @@ public class MainActivity extends Activity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_main);
+        switch (getResources().getConfiguration().orientation) {
+
+            case Configuration.ORIENTATION_PORTRAIT:
+                setContentView(R.layout.activity_main);
+                break;
+
+            case Configuration.ORIENTATION_LANDSCAPE:
+                setContentView(R.layout.activity_main_landscape);
+                break;
+        }
         ButterKnife.bind(this);
         wienerLinienDBHelper = WienerLinienDBHelper.getsInstance(getApplicationContext());
         db = wienerLinienDBHelper.getWritableDatabase();
@@ -73,6 +82,7 @@ public class MainActivity extends Activity {
         stationNames = wienerLinienDBHelper.getAllStationNames();
         ArrayAdapter<String> adapter = new ArrayAdapter<>(this, android.R.layout.simple_dropdown_item_1line, stationNames);
         actv_search.setAdapter(adapter);
+
 
         if(savedInstanceState != null){
             actv_search.setText(savedInstanceState.getString("searchterm"));
@@ -99,12 +109,14 @@ public class MainActivity extends Activity {
     static class GetRealtimeTask extends AsyncTask<URL, Void, String[]> {
 
         private final WeakReference<MainActivity> mainActivityWeakReference;
+
         GetRealtimeTask(MainActivity context){
             mainActivityWeakReference = new WeakReference<>(context);
         }
 
         @Override
         protected String[] doInBackground(URL... urls) {
+            /**In der Variable "response" wird das Ergebnis gespeichert, welches als Antwort auf die Anfrage an die Wiener Linien API gesendet wird */
             String response;
 
 
@@ -118,6 +130,11 @@ public class MainActivity extends Activity {
 
             try {
 
+                /** Hier wird der String response in ein JSONObject umgewandelt
+                 * das ist notwendig um zielgerichtet die benötigten Elemente aus der response herauszulesen
+                 * wir werden uns die originale Antwort im Detail gemeinsam ansehen
+                 * damit ist dann auch klar, dass in der Antwort viel mehr Informationen enthalten sind als wir brauchen*/
+
                 JSONObject realtimeJSON = new JSONObject(response);
                 JSONObject monitorData = realtimeJSON.getJSONObject("data");
                 JSONArray monitors = monitorData.getJSONArray("monitors");
@@ -125,8 +142,12 @@ public class MainActivity extends Activity {
                 int test = monitors.length();
 
 
-
                 mainActivityWeakReference.get().transportUnits = new ArrayList<>();
+
+
+                /** In der Schleife werden die einzelnen Monitore durchgegangen, vorübergehend in Objekte gespeichert und jeweils die wesentlichen Informationen herausgeholt
+                 * diese Informationen werden in einem selbst erstellten Objekt (TransportUnit) gespeichert
+                 * die TransportUnits werden in einer Liste gespeichert, welche dann der nächsten Activity übergeben werden um die Haltestellen auf einer Karte anzuzeigen*/
 
                 for (int i = 0; i < test; i++) {
 
@@ -158,6 +179,15 @@ public class MainActivity extends Activity {
             return new String[0];
         }
 
+        /**
+         * Die Methode onPostExecute() wird erst ausgeführt, wenn der AsyncTask fertig ist, sprich wenn die Antwort auf die Http-Anfrage fertig geladen hat
+         * erst hier wird die nächste Activiy gestartet
+         * das ist wichtig, denn sonst wären die angeforderten Informationen unvollständig und das Programm würde abstürzen, da der Prozess einfach unterbrochen wird
+         * wie wir bereits in der MenuActivity gesehen haben, wird eine neue Activity mittels eines Intent gestartet
+         * ein Intent ist ein Objekt zur Nachrichtenübermittlung
+         * ihm wird die Liste mit den Stationsinformationen mitgegeben
+         */
+
         @Override
         protected void onPostExecute(String[] strings) {
 
@@ -172,6 +202,13 @@ public class MainActivity extends Activity {
         }
     }
 
+    /**
+     * Diese Funktion wird aufgerufen sobald der Button btn_go gedrückt wird
+     * es wird die Eingabe des Users aus dem Edit Textfeld herausgeholt und behandelt
+     * mittels Datenbank Funktionen wird überprüft, ob zu diesem Namen eine RBL Nummer existiert
+     * wenn nicht, dann wird ein Dialog erstellt, welcher den User darauf hinweist, dass die Daten unvollständig sind
+     * ansonsten wird der AsyncTask gestartet, welcher die Informationen von der Wiener Linien API anfordert
+     */
 
     @OnClick(R.id.btn_go)
     public void submit() {
@@ -183,18 +220,19 @@ public class MainActivity extends Activity {
         tv_test.setText(wienerLinienDBHelper.getStationName(id));*/
 
         String userInput = actv_search.getText().toString();
+
         rbls = wienerLinienDBHelper.getRBLs(wienerLinienDBHelper.getStationId(userInput));
-        if(rbls != null){
+        int id = wienerLinienDBHelper.getStationId(userInput);
+        if (id == 0) {
+
+            Toast.makeText(getApplicationContext(), "Station does not exist!", Toast.LENGTH_SHORT).show();
+
+            actv_search.getText().clear();
+        } else if (rbls != null) {
             new GetRealtimeTask(MainActivity.this).execute(WienerLinenApi.buildWienerLinienMonitorUrl(rbls));
-        }
-        else{
-            AlertDialog.Builder builder = new AlertDialog.Builder(MainActivity.this);
-            builder.setMessage("Data is incomplete for this Station!")
-                    .setNeutralButton("OK", null);
+        } else {
 
-
-            AlertDialog dialog = builder.create();
-            dialog.show();
+            Toast.makeText(getApplicationContext(), "Data is incomplete for this station", Toast.LENGTH_SHORT).show();
             actv_search.getText().clear();
         }
 

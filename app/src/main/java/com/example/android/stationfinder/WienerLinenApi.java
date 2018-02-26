@@ -1,6 +1,7 @@
 package com.example.android.stationfinder;
 
 import android.net.Uri;
+import android.support.annotation.Nullable;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -78,6 +79,7 @@ class WienerLinenApi {
 
     }
 
+    @Nullable
     static String getHttpResponse(URL url) throws IOException {
 
         HttpURLConnection urlConnection = (HttpURLConnection) url.openConnection();
@@ -95,8 +97,8 @@ class WienerLinenApi {
                 return null;
             }
 
-    }finally {
+        } finally {
             urlConnection.disconnect();
         }
-        }
+    }
 }

@@ -1,13 +1,14 @@
 package com.example.android.stationfinder;
 
 import android.app.Activity;
-import android.app.AlertDialog;
 import android.content.Intent;
+import android.content.res.Configuration;
 import android.database.sqlite.SQLiteDatabase;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.Toast;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -21,6 +22,13 @@ import java.util.ArrayList;
 import butterknife.BindView;
 import butterknife.ButterKnife;
 import butterknife.OnClick;
+
+
+/**
+ * In der MainActivity passiert fast genau das gleiche wie in der Main2Activity, außer das hier zu Übungszwecken eine Station auch anhand ihrer RBL Nummer gesucht werden kann
+ * das macht einerseits die http Anfrage einfacher, da diese mit der RBL Nummer gestellt wird
+ * andererseits muss hier mehr auf die Eingabe des Users geachtet werden, da keine Vorschläge generiert werden wie bei der Suche mittels Namen
+ */
 
 public class Main2Activity extends Activity {
 
@@ -38,12 +46,20 @@ public class Main2Activity extends Activity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_main2);
+        switch (getResources().getConfiguration().orientation) {
+
+            case Configuration.ORIENTATION_PORTRAIT:
+                setContentView(R.layout.activity_main2);
+                break;
+
+            case Configuration.ORIENTATION_LANDSCAPE:
+                setContentView(R.layout.activity_main2_landscape);
+                break;
+        }
 
         ButterKnife.bind(this);
         wienerLinienDBHelper = WienerLinienDBHelper.getsInstance(getApplicationContext());
         db = wienerLinienDBHelper.getWritableDatabase();
-
 
 
     }
@@ -51,6 +67,7 @@ public class Main2Activity extends Activity {
     static class GetRealtimeTask extends AsyncTask<URL, Void, String[]> {
 
         private final WeakReference<Main2Activity> mainActivityWeakReference;
+
         GetRealtimeTask(Main2Activity context){
             mainActivityWeakReference = new WeakReference<>(context);
         }
@@ -75,7 +92,6 @@ public class Main2Activity extends Activity {
                 JSONArray monitors = monitorData.getJSONArray("monitors");
                 //Testing variable
                 int test = monitors.length();
-
 
 
                 mainActivityWeakReference.get().transportUnits = new ArrayList<>();
@@ -125,6 +141,13 @@ public class Main2Activity extends Activity {
     }
 
 
+    /**
+     * Die RBL Nummern müssen in einem ganz bestimmten Format eingegeben werden, damit das Programm korrekt funktioniert
+     * als guter Entwickler muss man jedoch alle Fälle von fehlerhafter Eingabe abdecken um einen Programmabsturz zu verhindern
+     * evtl. Übung:
+     * welche Arten von fehlerhafter Eingabe fallen euch ein, die einem User passieren könnten?
+     */
+
 
     @OnClick(R.id.btn_go)
     public void submit() {
@@ -132,43 +155,52 @@ public class Main2Activity extends Activity {
         String userInput = et_rbl.getText().toString();
         String[] nums = userInput.split(",");
         String empty = "";
-        if(nums.length != 0){
-            rbls = new ArrayList<>();
-            for (String num : nums) {
-                if (num.trim().equals(empty)) {
+        if (nums.length == 1) {
+            if (nums[0].trim().equals(empty)) {
 
-                    AlertDialog.Builder builder = new AlertDialog.Builder(Main2Activity.this);
-                    builder.setMessage("Please enter a number!")
-                            .setNeutralButton("OK", null);
-                    AlertDialog dialog = builder.create();
-                    dialog.show();
+                Toast.makeText(getApplicationContext(), "Please enter number!", Toast.LENGTH_SHORT).show();
+
+                et_rbl.getText().clear();
+
+            } else if (!wienerLinienDBHelper.rblExists(nums[0])) {
+
+                Toast.makeText(getApplicationContext(), "Faulty RBL!", Toast.LENGTH_SHORT).show();
+                et_rbl.getText().clear();
+
+            } else {
+                rbls = new ArrayList<>();
+                rbls.add(Integer.parseInt(nums[0].trim()));
+                new GetRealtimeTask(Main2Activity.this).execute(WienerLinenApi.buildWienerLinienMonitorUrl(rbls));
+
+            }
+
+        } else if (nums.length > 1) {
+            rbls = new ArrayList<>();
+            Toast faultyToast = null;
+            for (String num : nums) {
+                if (num.trim().equals(empty) || !wienerLinienDBHelper.rblExists(num)) {
+
+                    faultyToast = Toast.makeText(getApplicationContext(), "Faulty input, showing existing stations!", Toast.LENGTH_LONG);
+
                     et_rbl.getText().clear();
 
-                }
-                else if(!wienerLinienDBHelper.rblExists(num)){
-                    AlertDialog.Builder builder = new AlertDialog.Builder(Main2Activity.this);
-                    builder.setMessage("No such RBL!")
-                            .setNeutralButton("OK", null);
-                    AlertDialog dialog = builder.create();
-                    dialog.show();
-                }
-
-                 else {
+                } else {
 
                     rbls.add(Integer.parseInt(num.trim()));
-                    new GetRealtimeTask(Main2Activity.this).execute(WienerLinenApi.buildWienerLinienMonitorUrl(rbls));
+
                 }
+            }
+            if (rbls.size() > 0) {
+                new GetRealtimeTask(Main2Activity.this).execute(WienerLinenApi.buildWienerLinienMonitorUrl(rbls));
+                if (faultyToast != null) faultyToast.show();
             }
 
         }else {
-            AlertDialog.Builder builder = new AlertDialog.Builder(Main2Activity.this);
-            builder.setMessage("Please enter a number!")
-                    .setNeutralButton("OK", null);
-            AlertDialog dialog = builder.create();
-            dialog.show();
+            Toast.makeText(getApplicationContext(), "Please enter number!", Toast.LENGTH_SHORT).show();
+
         }
 
-       // id = Integer.parseInt(userInput);
+        // id = Integer.parseInt(userInput);
         //tv_test.setText(wienerLinienDBHelper.getStationName(id));
 
        /* String userInput = actv_search.getText().toString();

@@ -174,7 +174,7 @@ public class WienerLinienDBHelper extends SQLiteOpenHelper {
 
     }
 
-    String getStationName(int id){
+   /* String getStationName(int id){
 
         SQLiteDatabase db = getReadableDatabase();
         String stringId = Integer.toString(id);
@@ -190,13 +190,14 @@ public class WienerLinienDBHelper extends SQLiteOpenHelper {
         }
 
         return res.getString(0);
-     }
+     }*/
 
     ArrayList<String> getAllStationNames(){
         SQLiteDatabase db = getReadableDatabase();
         ArrayList<String> list = new ArrayList<>();
         Cursor res = db.rawQuery("SELECT " + COL_NAME + " FROM " + TABLE_HALTESTELLEN,new String[]{});
         if(res.getCount() == 0){
+            res.close();
             return null;
 
         }else{
@@ -208,6 +209,7 @@ public class WienerLinienDBHelper extends SQLiteOpenHelper {
 
                     }while (res.moveToNext());
                 }
+            res.close();
 
         }return list;
      }
@@ -220,6 +222,7 @@ public class WienerLinienDBHelper extends SQLiteOpenHelper {
         Cursor res = db.rawQuery(sql, new String[]{stringId});
 
        if(res.getCount() == 0){
+           res.close();
            return null;
        }else {
            if(res.moveToFirst()){
@@ -227,6 +230,7 @@ public class WienerLinienDBHelper extends SQLiteOpenHelper {
                    rbls.add(res.getInt(0));
                }while (res.moveToNext());
            }
+           res.close();
        }return rbls;
 
 
@@ -237,12 +241,19 @@ public class WienerLinienDBHelper extends SQLiteOpenHelper {
 
         SQLiteDatabase db = getReadableDatabase();
         String SQL = "SELECT " + COL_HALTESTELLEN_ID + " FROM " + TABLE_HALTESTELLEN + " WHERE " + COL_NAME + " = ?";
-
+        int r;
         Cursor res = db.rawQuery(SQL, new String[]{name});
-        if(res.getCount() == 0) return 0;
+        if (res.getCount() == 0) {
+            r = 0;
+            res.close();
+            return 0;
+        }
         else {
             res.moveToFirst();
-        }return res.getInt(0);
+            r = res.getInt(0);
+            res.close();
+        }
+        return r;
 
     }
 
@@ -252,9 +263,9 @@ public class WienerLinienDBHelper extends SQLiteOpenHelper {
 
         String sql = "SELECT " + COL_HALTESTELLEN_ID + " FROM " + TABLE_STEIGE + " WHERE " + COL_RBL + " = ?";
         Cursor res = db.rawQuery(sql, new String[]{ rbl});
-
-        if(res.moveToFirst()) return true;
-        else return false;
+        boolean rBool = res.moveToFirst();
+        res.close();
+        return rBool;
 
     }
 }
